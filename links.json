@@ -1,0 +1,333 @@
+[
+    {
+        "source": "York",
+        "target": "Sanford",
+        "distance": 37
+    },
+    {
+        "source": "York",
+        "target": "Kennebunk",
+        "distance": 25
+    },
+    {
+        "source": "York",
+        "target": "South Portland",
+        "distance": 50
+    },
+    {
+        "source": "Kennebunk",
+        "target": "Scarborough",
+        "distance": 28
+    },
+    {
+        "source": "Sanford",
+        "target": "Kennebunk",
+        "distance": 25
+    },    {
+        "source": "Sanford",
+        "target": "Biddeford",
+        "distance": 33
+    },    {
+        "source": "Biddeford",
+        "target": "Portland #2",
+        "distance": 30
+    },    {
+        "source": "Portland #2",
+        "target": "Scarborough",
+        "distance": 15
+    },    {
+        "source": "Scarborough",
+        "target": "Portland Field",
+        "distance": 15
+    },    {
+        "source": "Scarborough",
+        "target": "South Portland",
+        "distance": 15
+    },    {
+        "source": "Portland Field",
+        "target": "South Portland",
+        "distance": 15
+    },    {
+        "source": "South Portland",
+        "target": "Brunswick",
+        "distance": 40
+    },    {
+        "source": "Brunswick",
+        "target": "Bath",
+        "distance": 10
+    },    {
+        "source": "Brunswick",
+        "target": "Topsham",
+        "distance": 5
+    },
+    {
+        "source": "Portland Field",
+        "target": "Topsham",
+        "distance": 30
+    },
+    {
+        "source": "Bath",
+        "target": "Newcastle",
+        "distance": 27
+    },
+    {
+        "source": "Bath",
+        "target": "Topsham",
+        "distance": 12
+    },
+    {
+        "source": "Portland Field",
+        "target": "Yarmouth",
+        "distance": 20
+    },
+    {
+        "source": "Yarmouth",
+        "target": "Westbrook",
+        "distance": 22
+    },
+    {
+        "source": "Portland #2",
+        "target": "Yarmouth",
+        "distance": 0
+    },
+    {
+        "source": "Biddeford",
+        "target": "Westbrook",
+        "distance": 30
+    },
+    {
+        "source": "Biddeford",
+        "target": "Windham",
+        "distance": 40
+    },
+    {
+        "source": "Westbrook",
+        "target": "Windham",
+        "distance": 15
+    },
+    {
+        "source": "Westbrook",
+        "target": "Gardiner",
+        "distance": 54
+    },
+    {
+        "source": "Windham",
+        "target": "Gardiner",
+        "distance": 55
+    },
+    {
+        "source": "Gardiner",
+        "target": "Yarmouth",
+        "distance": 48
+    },
+    {
+        "source": "Yarmouth",
+        "target": "Searsport",
+        "distance": 110
+    },
+    {
+        "source": "Gardiner",
+        "target": "Searsport",
+        "distance": 71
+    },
+    {
+        "source": "Yarmouth",
+        "target": "Topsham",
+        "distance": 20
+    },
+    {
+        "source": "Topsham",
+        "target": "Rockland",
+        "distance": 80
+    },
+    {
+        "source": "Rockland",
+        "target": "Newcastle",
+        "distance": 71
+    },
+    {
+        "source": "Rockland",
+        "target": "Ellsworth",
+        "distance": 94
+    },
+    {
+        "source": "Ellsworth",
+        "target": "Bar Harbor",
+        "distance": 35
+    },
+    {
+        "source": "Bar Harbor",
+        "target": "Machias",
+        "distance": 95
+    },
+    {
+        "source": "Machias",
+        "target": "Ellsworth",
+        "distance": 75
+    },
+    {
+        "source": "Machias",
+        "target": "Calais",
+        "distance": 60
+    },
+    {
+        "source": "Ellsworth",
+        "target": "Brewer",
+        "distance": 39
+    },
+    {
+        "source": "Ellsworth",
+        "target": "Bangor",
+        "distance": 40
+    },
+    {
+        "source": "Ellsworth",
+        "target": "Searsport",
+        "distance": 42
+    },
+    {
+        "source": "Searsport",
+        "target": "Gardiner",
+        "distance": 71
+    },
+    {
+        "source": "Windham",
+        "target": "Lewiston",
+        "distance": 40
+    },
+    {
+        "source": "Windham",
+        "target": "Auburn",
+        "distance": 38
+    },
+    {
+        "source": "Windham",
+        "target": "South Paris",
+        "distance": 55
+    },
+    {
+        "source": "South Paris",
+        "target": "Auburn",
+        "distance": 32
+    },
+    {
+        "source": "Auburn",
+        "target": "Farmington",
+        "distance": 65
+    },
+    {
+        "source": "South Paris",
+        "target": "Farmington",
+        "distance": 60
+    },
+    {
+        "source": "South Paris",
+        "target": "Rumford",
+        "distance": 42
+    },
+    {
+        "source": "Rumford",
+        "target": "Farmington",
+        "distance": 42
+    },
+    {
+        "source": "Rumford",
+        "target": "Skowhegan",
+        "distance": 75
+    },
+    {
+        "source": "Farmington",
+        "target": "Skowhegan",
+        "distance": 38
+    },
+    {
+        "source": "Farmington",
+        "target": "Waterville",
+        "distance": 50
+    },
+    {
+        "source": "Farmington",
+        "target": "Lewiston",
+        "distance": 70
+    },
+    {
+        "source": "Farmington",
+        "target": "Augusta",
+        "distance": 51
+    },
+    {
+        "source": "Lewiston",
+        "target": "Augusta",
+        "distance": 39
+    },
+    {
+        "source": "Lewiston",
+        "target": "Gardiner",
+        "distance": 32
+    },
+    {
+        "source": "Gardiner",
+        "target": "Augusta",
+        "distance": 14
+    },
+    {
+        "source": "Augusta",
+        "target": "Searsport",
+        "distance": 65
+    },
+    {
+        "source": "Waterville",
+        "target": "Augusta",
+        "distance": 29
+    },
+    {
+        "source": "Augusta",
+        "target": "Bangor",
+        "distance": 70
+    },
+    {
+        "source": "Skowhegan",
+        "target": "Dover Foxcroft",
+        "distance": 60
+    },
+    {
+        "source": "Dover Foxcroft",
+        "target": "Waterville",
+        "distance": 0
+    },
+    {
+        "source": "Waterville",
+        "target": "Bangor",
+        "distance": 53
+    },
+    {
+        "source": "Bangor",
+        "target": "Orono",
+        "distance": 17
+    },
+    {
+        "source": "Bangor",
+        "target": "Brewer",
+        "distance": 5
+    },
+    {
+        "source": "Orono",
+        "target": "Brewer",
+        "distance": 20
+    },
+    {
+        "source": "Dover Foxcroft",
+        "target": "Orono",
+        "distance": 53
+    },
+    {
+        "source": "Bangor",
+        "target": "Presque Isle",
+        "distance": 140
+    },
+    {
+        "source": "Madawaska",
+        "target": "Presque Isle",
+        "distance": 76
+    } 
+]

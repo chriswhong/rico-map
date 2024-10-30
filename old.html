@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapbox GL JS with CSV</title>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"
+        integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script>
+
+        function formatMinutesAsHours(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+
+            const hoursText = hours > 0 ? `${hours}h` : ''
+
+            return `${hoursText}${parseInt(mins)}m`;
+        }
+
+        function generateClosestNeighborLines(pointsFeatureCollection) {
+            // Helper function to calculate the distance between two points (Haversine formula)
+            function calculateDistance(coord1, coord2) {
+                const [lon1, lat1] = coord1;
+                const [lon2, lat2] = coord2;
+                const R = 6371e3; // Earth's radius in meters
+                const rad = Math.PI / 180;
+                const φ1 = lat1 * rad;
+                const φ2 = lat2 * rad;
+                const Δφ = (lat2 - lat1) * rad;
+                const Δλ = (lon2 - lon1) * rad;
+
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c; // Distance in meters
+            }
+
+            const points = pointsFeatureCollection.features;
+            const numPoints = points.length;
+
+            if (numPoints < 2) {
+                // If there's less than 2 points, return empty feature collection (no lines can be drawn)
+                return {
+                    type: "FeatureCollection",
+                    features: []
+                };
+            }
+
+            const lines = [];
+            const visited = new Array(numPoints).fill(false);
+            const distances = new Array(numPoints).fill(Infinity);
+            const previous = new Array(numPoints).fill(null);
+
+            // Start from the first point
+            distances[0] = 0;
+
+            for (let i = 0; i < numPoints; i++) {
+                // Find the closest unvisited point
+                let minDistance = Infinity;
+                let minIndex = -1;
+
+                for (let j = 0; j < numPoints; j++) {
+                    if (!visited[j] && distances[j] < minDistance) {
+                        minDistance = distances[j];
+                        minIndex = j;
+                    }
+                }
+
+                // Mark the point as visited
+                visited[minIndex] = true;
+
+                // If it's not the starting point, create a LineString from the previous point to this one
+                if (previous[minIndex] !== null) {
+                    const coord1 = points[minIndex].geometry.coordinates;
+                    const coord2 = points[previous[minIndex]].geometry.coordinates;
+                    const line = {
+                        type: "Feature",
+                        geometry: {
+                            type: "LineString",
+                            coordinates: [coord1, coord2],
+                        },
+                        properties: {},
+                    };
+                    lines.push(line);
+                }
+
+                // Update the distances to the rest of the points
+                for (let j = 0; j < numPoints; j++) {
+                    if (!visited[j]) {
+                        const dist = calculateDistance(
+                            points[minIndex].geometry.coordinates,
+                            points[j].geometry.coordinates
+                        );
+                        if (dist < distances[j]) {
+                            distances[j] = dist;
+                            previous[j] = minIndex;
+                        }
+                    }
+                }
+            }
+
+            // Return a new FeatureCollection of LineStrings
+            return {
+                type: "FeatureCollection",
+                features: lines,
+            };
+        }
+
+        // Function to calculate the distance between two coordinates using the Haversine formula
+        function haversineDistance(coord1, coord2) {
+            const [lon1, lat1] = coord1;
+            const [lon2, lat2] = coord2;
+            const R = 6371e3; // Radius of the Earth in meters
+            const rad = Math.PI / 180;
+            const φ1 = lat1 * rad;
+            const φ2 = lat2 * rad;
+            const Δφ = (lat2 - lat1) * rad;
+            const Δλ = (lon2 - lon1) * rad;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // Distance in meters
+        }
+
+        // Function to calculate the midpoint between two coordinates
+        function calculateMidpoint(coord1, coord2) {
+            const [lon1, lat1] = coord1;
+            const [lon2, lat2] = coord2;
+
+            const midLon = (lon1 + lon2) / 2;
+            const midLat = (lat1 + lat2) / 2;
+
+            return [midLon, midLat];
+        }
+
+        // Function to approximate travel time based on distance
+        function approximateTravelTime(distanceMeters) {
+            const averageSpeedKmH = 60; // Assume an average speed of 60 km/h
+            const distanceKm = distanceMeters / 1000; // Convert meters to kilometers
+            const travelTimeHours = distanceKm / averageSpeedKmH;
+
+            return travelTimeHours * 60; // Return travel time in minutes
+        }
+
+        // Main function to process the GeoJSON FeatureCollection
+        function generateMidpointsAndTravelTimes(featureCollection) {
+            const midpointFeatures = [];
+
+            featureCollection.features.forEach(feature => {
+                if (feature.geometry.type === 'LineString') {
+                    const coordinates = feature.geometry.coordinates;
+                    const start = coordinates[0];
+                    const end = coordinates[coordinates.length - 1];
+
+                    // Calculate midpoint
+                    const midpoint = calculateMidpoint(start, end);
+
+                    // Calculate distance between start and end points
+                    const distance = haversineDistance(start, end);
+
+                    // Approximate travel time
+                    const travelTimeMinutes = approximateTravelTime(distance);
+
+                    // Create a GeoJSON Point feature for the midpoint
+                    const midpointFeature = {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: midpoint
+                        },
+                        properties: {
+                            travelTimeMinutes: formatMinutesAsHours(travelTimeMinutes.toFixed(2)), // Store the travel time in minutes
+                            distanceMeters: distance.toFixed(2) // Store the distance in meters
+                        }
+                    };
+
+                    midpointFeatures.push(midpointFeature);
+                }
+            });
+
+            return {
+                type: 'FeatureCollection',
+                features: midpointFeatures
+            };
+        }
+
+
+        // Replace with your Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiY2hyaXN3aG9uZ21hcGJveCIsImEiOiJjbDl6bzJ6N3EwMGczM3BudjZmbm5yOXFnIn0.lPhc5Z5H3byF_gf_Jz48Ug';
+
+        // Initialize the map
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            bounds: [[-71.36788, 42.96825], [-66.74083, 47.61985]]
+        });
+
+        // Path to the local CSV file
+        const csvUrl = 'output.csv'; // Assuming the CSV file is in the same directory as index.html
+
+        // Fetch and parse the CSV file
+        fetch(csvUrl)
+            .then(response => response.text())
+            .then(csvText => {
+                Papa.parse(csvText, {
+                    header: true,
+                    dynamicTyping: true,
+                    complete: function (results) {
+                        const pointsGeoJSON = csvToGeoJSON(results.data);
+                        addPointsGeoJSONLayer(pointsGeoJSON);
+
+                        const lineStringsGeoJSON = generateClosestNeighborLines(pointsGeoJSON);
+                        console.log(lineStringsGeoJSON)
+
+                        addLinstringsGeoJSONLayer(lineStringsGeoJSON)
+
+                        const midpointsGeoJSON = generateMidpointsAndTravelTimes(lineStringsGeoJSON);
+
+                        addMidpointsGeojsonLayer(midpointsGeoJSON)
+
+                    },
+                    error: function (error) {
+                        console.error('Error parsing CSV:', error);
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching the CSV file:', error));
+
+        // Convert CSV to GeoJSON
+        function csvToGeoJSON(data) {
+            return {
+                type: 'FeatureCollection',
+                features: data.map((row) => ({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [row.Longitude, row.Latitude] // Assumes the CSV has 'latitude' and 'longitude' columns
+                    },
+                    properties: { ...row } // Include all other data as properties
+                }))
+            };
+        }
+
+        // Add the GeoJSON layer to the map
+        function addPointsGeoJSONLayer(geojson) {
+            map.on('load', function () {
+                map.addSource('pointsData', {
+                    type: 'geojson',
+                    data: geojson
+                });
+
+                map.addLayer({
+                    id: 'pointsData',
+                    type: 'circle',
+                    source: 'pointsData',
+                    paint: {
+                        'circle-radius': 3,
+                        'circle-color': '#000',
+                        'circle-stroke-width': 1,
+                        'circle-stroke-color': '#000'
+                    }
+                });
+
+                // Add a symbol layer for addresses
+                map.addLayer({
+                    id: 'location-address',
+                    type: 'symbol',
+                    source: 'pointsData',
+                    layout: {
+                        'text-field': ['get', 'SL Street Address'],
+                        'text-size': 8, // Smaller text for address
+                        'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+                        'text-offset': [0, -2.6], // Slightly below the location name
+                        'text-anchor': 'top',
+                        'text-allow-overlap': true
+
+                    },
+                    paint: {
+                        'text-color': '#666666', // Gray color for address text
+                    },
+                    minzoom: 7 // Layer becomes visible after zoom level 12
+
+                });
+
+                // Add a symbol layer for location names
+                map.addLayer({
+                    id: 'location-name',
+                    type: 'symbol',
+                    source: 'pointsData',
+                    layout: {
+                        'text-field': ['get', 'SL Name'],
+                        'text-size': 10, // Larger text for location name
+                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, -3.3], // Adjust the vertical offset to avoid overlapping with the point marker
+                        'text-anchor': 'top',
+                        // 'text-allow-overlap': true
+                    },
+                    paint: {
+                        'text-color': '#000000', // Black text for visibility
+                    }
+                });
+
+
+            });
+        }
+
+
+        // Add the GeoJSON layer to the map
+        function addMidpointsGeojsonLayer(geojson) {
+            map.on('load', function () {
+                map.addSource('midpointsData', {
+                    type: 'geojson',
+                    data: geojson
+                });
+
+                // Add a symbol layer for addresses
+                map.addLayer({
+                    id: 'travel-times',
+                    type: 'symbol',
+                    source: 'midpointsData',
+                    layout: {
+                        'text-field': ['get', 'travelTimeMinutes'],
+                        'text-size': 8, // Larger text for location name
+                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, -2], // Adjust the vertical offset to avoid overlapping with the point marker
+                        'text-anchor': 'top',
+                        // 'text-allow-overlap': true
+                    },
+                    paint: {
+                        'text-color': '#000000', // Black text for visibility
+                    }// Layer becomes visible after zoom level 12
+
+                });
+
+            });
+        }
+
+        // Add the GeoJSON layer to the map
+        function addLinstringsGeoJSONLayer(geojson) {
+            map.on('load', function () {
+                map.addSource('linestringsData', {
+                    type: 'geojson',
+                    data: geojson
+                });
+
+                map.addLayer({
+                    id: 'linestringsDataLayer',
+                    type: 'line',
+                    source: 'linestringsData',
+                    paint: {
+                        'line-width': 1,
+                        'line-color': '#000'
+                    }
+                });
+            });
+        }
+
+
+
+    </script>
+</body>
+
+</html>
