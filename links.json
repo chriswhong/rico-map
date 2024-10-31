@@ -88,7 +88,7 @@
     {
         "source": "Portland #2",
         "target": "Yarmouth",
-        "distance": 0
+        "distance": 20
     },
     {
         "source": "Biddeford",
@@ -293,7 +293,7 @@
     {
         "source": "Dover Foxcroft",
         "target": "Waterville",
-        "distance": 0
+        "distance": 60
     },
     {
         "source": "Waterville",
